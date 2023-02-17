@@ -23,7 +23,7 @@ path.append("/usr/src/mytonctrl/")
 from mytoncore import *
 
 local = MyPyClass(__file__)
-ton = MyTonCore()
+ton = MyTonCore(local)
 
 class IP:
 	def __init__(self, addr):
