@@ -2,6 +2,9 @@
 # -*- coding: utf_8 -*-l
 
 # pip3 install Werkzeug json-rpc
+import os
+import sys
+import requests
 import random
 import secrets
 import getpass
@@ -10,7 +13,8 @@ import json
 import jsonpickle
 import cloudscraper
 import pyotp
-from sys import path
+import time
+
 from werkzeug.wrappers import Request, Response
 from werkzeug.datastructures import Headers
 from werkzeug.serving import run_simple, make_ssl_devcert
@@ -19,8 +23,23 @@ from jsonrpc import JSONRPCResponseManager, dispatcher
 from jsonrpc.jsonrpc import JSONRPCRequest
 from jsonrpc.exceptions import JSONRPCDispatchException
 
-path.append("/usr/src/mytonctrl/")
-from mytoncore import *
+# from sys import path
+# path.append("/usr/src/mytonctrl/")
+
+from mytoncore import (
+	MyPyClass,
+	MyTonCore,
+)
+from mytoncore.functions import (
+	GetLoadAvg,
+	Elections
+)
+from mypylib.mypylib import (
+	GetServiceStatus,
+	CheckGitUpdate,
+	RunAsRoot
+)
+
 
 local = MyPyClass(__file__)
 ton = MyTonCore(local)
@@ -370,7 +389,7 @@ def el():
 def ve():
 	global ip
 	ip.CheckAccess()
-	Elections(ton)
+	Elections(local, ton)
 	return True
 #end define
 
