@@ -41,7 +41,7 @@ from mypylib.mypylib import (
 )
 
 
-local = MyPyClass(__file__)
+local = MyPyClass('mytoncore.py')
 ton = MyTonCore(local)
 
 class IP:
