@@ -15,6 +15,7 @@ import cloudscraper
 import pyotp
 import time
 
+from functools import wraps
 from werkzeug.wrappers import Request, Response
 from werkzeug.datastructures import Headers
 from werkzeug.serving import run_simple, make_ssl_devcert
@@ -43,6 +44,17 @@ from mypylib.mypylib import (
 
 local = MyPyClass('mytoncore.py')
 ton = MyTonCore(local)
+
+
+def with_stop_mytoncore_service(func):
+	@wraps(func)
+	def wrapped_func(*args, **kwargs):
+		RunAsRoot(['systemctl', 'stop', 'mytoncore.service'])
+		res = func(*args, **kwargs)
+		RunAsRoot(['systemctl', 'start', 'mytoncore.service'])
+		return res
+	return wrapped_func
+
 
 class IP:
 	def __init__(self, addr):
@@ -492,6 +504,7 @@ def GetOTPStatus():
 #end define
 
 @dispatcher.add_method
+@with_stop_mytoncore_service
 def SetupOTP():
 	global ip
 	ip.CheckAccess()
@@ -507,6 +520,7 @@ def SetupOTP():
 #end define
 
 @dispatcher.add_method
+@with_stop_mytoncore_service
 def VerifyOTP(code):
 	global ip
 	ip.CheckAccess()
@@ -524,11 +538,17 @@ def VerifyOTP(code):
 			return False
 #end define
 
+@with_stop_mytoncore_service
+def SetPort():
+	port = random.randint(2000, 65000)
+	ton.SetSettings("jsonrpcPort", port)
+	return port
+#end define
+
 def GetPort():
 	port = ton.GetSettings("jsonrpcPort")
 	if port is None:
-		port = random.randint(2000, 65000)
-		ton.SetSettings("jsonrpcPort", port)
+		port = SetPort()
 	return port
 #end define
 
@@ -546,6 +566,7 @@ def SetArgsByArgs(runArgs, args):
 	return runArgs
 #end define
 
+@with_stop_mytoncore_service
 def SetWebPassword():
 	local.AddLog("start SetWebPassword function", "debug")
 	port = GetPort()
